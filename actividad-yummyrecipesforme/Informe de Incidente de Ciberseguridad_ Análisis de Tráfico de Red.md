@@ -1,58 +1,55 @@
-**Informe de Incidente de Ciberseguridad: Análisis de Tráfico de Red**
+# Informe de Incidente de Ciberseguridad  (Actividad para Google Certificados)
+**Fecha:** 17 de abril de 2025  
+**Analista:** Albert Antunez  
 
-**Parte 1: Resumen del problema en el registro tcpdump**  
+---
 
-**Protocolos implicados:** 
+## Parte 1: Resumen del problema en el registro tcpdump  
 
-- **DNS (UDP, puerto 53):** Se enviaron consultas DNS desde el cliente (192.51.100.15) al servidor DNS (203.0.113.2) para resolver el dominio yummyrecipesforme.com.    
-- **ICMP:** El servidor DNS respondió con mensajes de error "puerto UDP 53 inalcanzable".
+### Protocolos implicados  
+- **DNS (UDP, puerto 53)**: Consultas desde el cliente (`192.51.100.15`) al servidor DNS (`203.0.113.2`) para resolver `yummyrecipesforme.com`.  
+- **ICMP**: Respuestas con error *"puerto UDP 53 inalcanzable"*.  
 
-**Hallazgos clave:** 
+### Hallazgos clave  
+- **Puerto 53 inaccesible**: El servidor DNS no responde a solicitudes UDP en el puerto 53.  
+- **Errores recurrentes**: Múltiples intentos fallidos seguidos de mensajes ICMP (3 intentos registrados).  
 
-- **Puerto 53 inaccesible:** Las respuestas ICMP indican que el servidor DNS no está escuchando en el puerto 53 (estándar para DNS), lo que impide la resolución del dominio.    
-- **Repetición de errores:** Se observaron múltiples intentos fallidos de conexión UDP al puerto 53, seguidos de mensajes ICMP consistentes.  
+### Problema principal  
+El servicio DNS en `203.0.113.2` no está operativo o está bloqueado, impidiendo la resolución del dominio.  
 
-**Problema principal:**  
-    
-El servicio DNS en el servidor 203.0.113.2 no está operativo o está bloqueado, lo que impide a los usuarios acceder al sitio web yummyrecipesforme.com.  
+---
 
-**Parte 2:** Análisis y causa probable del incidente  
-    
-**Momento del incidente:**
+## Parte 2: Análisis y causa probable  
 
-**Primer reporte:** 13:24:32 (marcas de tiempo en el registro tcpdump).  
+### Cronología del incidente  
+- **Primer reporte**: 13:24:32 (según marcas de tiempo en tcpdump).  
+- **Síntomas reportados**:  
+  - Usuarios no podían acceder a `www.yummyrecipesforme.com`.  
+  - Mensaje de error: *"Puerto de destino inalcanzable"*.  
 
-**Detectado por:**
+### Acciones tomadas  
+1. **Captura de tráfico**: Uso de `tcpdump` para analizar solicitudes DNS.  
+2. **Identificación de patrones**:  
+   - Consultas UDP al puerto 53 sin respuesta válida.  
+   - Respuestas ICMP indicando inaccesibilidad del puerto.  
 
-- **Usuarios finales:** No podían acceder al sitio web y recibían el error "puerto de destino inalcanzable".  
-- **Herramienta de análisis (tcpdump):** Confirmó fallos en las consultas DNS.  
+### Causa raíz probable  
+- **Configuración incorrecta del servidor DNS**: Servicio no activo o mal configurado.  
+- **Firewall restrictivo**: Bloqueo del puerto 53 UDP en el servidor o red.  
 
-**Acciones tomadas por el equipo de TI:**
+### Próximos pasos  
+1. **Verificar estado del servicio DNS**:  
+   - Reiniciar servicio en `203.0.113.2`.  
+   - Validar configuración de zona DNS.  
+2. **Revisar políticas de firewall**:  
+   - Asegurar que el puerto 53 UDP esté permitido.  
+3. **Monitoreo post-corrección**:  
+   - Realizar pruebas de conectividad y resolución DNS.  
 
+---
 
-1. **Captura de tráfico:** Uso de tcpdump para monitorear las solicitudes DNS y respuestas ICMP.    
-2. **Análisis de registros:** Identificación de errores recurrentes en el puerto 53\.  
+## Conclusión  
+El incidente se originó por la inaccesibilidad del puerto 53 UDP en el servidor DNS, interrumpiendo la resolución del dominio. Se recomienda implementar monitoreo continuo para evitar recurrencias.  
 
-**Hallazgos clave de la investigación:**  
- 
-
-- **Puerto 53 bloqueado o inactivo:** El servidor DNS no responde a solicitudes UDP en el puerto 53\.    
-- **Protocolos afectados:** DNS (UDP) e ICMP (para notificar el error).  
-
-**Causa raíz probable:** 
-
-- **Configuración incorrecta del servidor DNS:** El servicio DNS podría estar deshabilitado o mal configurado.    
-- **Reglas de firewall restrictivas:** Bloqueo del puerto 53 UDP en el servidor o en la red.  
-
-**Próximos pasos:**  
-
-1. **Verificar estado del servicio DNS:** Reiniciar el servicio o corregir configuraciones en el servidor 203.0.113.2.    
-2. **Revisar reglas de firewall:** Asegurar que el puerto 53 UDP esté permitido para tráfico entrante/saliente.    
-3. **Monitoreo post-corrección:** Confirmar resolución del error mediante nuevas pruebas de acceso al sitio.  
-
-**Conclusión:**  
-    
-El incidente fue causado por la inaccesibilidad del puerto 53 UDP en el servidor DNS, lo que interrumpió la resolución del dominio. La solución implica corregir la configuración del servidor y/o ajustar las políticas de firewall.  
-
-**Estado actual:** En investigación.  
-**Prioridad:** Alta (afecta a la disponibilidad del sitio web).  
+**Prioridad:** 🔴 Alta (impacto en disponibilidad del sitio web).  
+**Estado:** 🕵️ En investigación.
